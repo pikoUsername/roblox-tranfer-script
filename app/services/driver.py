@@ -68,6 +68,9 @@ def get_driver(settings: "Settings") -> WebDriver:
 
         opts = webdriver.FirefoxOptions()
         opts.add_argument("--disable-web-security")
+        if not settings.debug:
+            opts.add_argument("--headless")
+            opts.add_argument('--disable-gpu')
         agent = settings.user_agent
         opts.add_argument(agent)
 
