@@ -11,7 +11,7 @@ from loguru import logger
 from pydantic import BaseModel, validator
 
 import pika
-from pika.exceptions import AMQPConnectionError
+from pika.exceptions import AMQPConnectionError, StreamLostError
 
 from app.settings import Settings
 
@@ -145,20 +145,24 @@ class BasicMessageSender(BasicPikaClient):
             routing_key = self.routing
         body = bytes(json.dumps(body), 'utf8')
         if self.channel.is_open:
-            self.channel.basic_publish(
-                exchange=exchange_name,
-                routing_key=routing_key,
-                body=body,
-                properties=pika.BasicProperties(
-                    delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE,
-                    priority=headers.priority.value if headers else None,
-                    headers=headers.dict() if headers else None,
-                    content_type="application/json",
-                ),
-            )
-            logger.info(
-                f"Sent message. Exchange: {exchange_name}, Routing Key: {routing_key}, Body: {body[:128]}"
-            )
+            try:
+                self.channel.basic_publish(
+                    exchange=exchange_name,
+                    routing_key=routing_key,
+                    body=body,
+                    properties=pika.BasicProperties(
+                        delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE,
+                        priority=headers.priority.value if headers else None,
+                        headers=headers.dict() if headers else None,
+                        content_type="application/json",
+                    ),
+                )
+                logger.info(
+                    f"Sent message. Exchange: {exchange_name}, Routing Key: {routing_key}, Body: {body[:128]}"
+                )
+            except StreamLostError:
+                # tries to reconnect
+                self._connect()
         else:
             self.check_connection()
             logger.error("RETURN CHANNEL UNEXPECTEDLY CLOSED BY PEER, TRY TO INCREASE HEARTBEAT")

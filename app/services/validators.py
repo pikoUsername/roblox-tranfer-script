@@ -1,7 +1,7 @@
 import re
 
 
-url_validator_re = re.compile(r"https?:\/\/(www)?\.roblox\.com\/game-pass\/(\d*)/(\w*)?")
+url_validator_re = re.compile(r"https?:\/\/(www)?\.roblox\.com\/game-pass\/(\d*)\/")
 
 
 def validate_game_pass_url(url: str) -> bool:

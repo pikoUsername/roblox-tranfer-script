@@ -116,12 +116,12 @@ class UrlHandler(IListener):
             data: dict,
             session: ClientSession
     ) -> None:
-        if not validate_game_pass_url(purchase_data.url):
-            logger.info("Not correct url, denying!")
-            data.update(
-                return_signal=ReturnSignal(status_code=StatusCodes.invalid_data)
-            )
-            return
+        # if not validate_game_pass_url(purchase_data.url):
+        #     logger.info("Not correct url, denying!")
+        #     data.update(
+        #         return_signal=ReturnSignal(status_code=StatusCodes.invalid_data)
+        #     )
+        #     return
 
         logger.info(f"Redirecting to {purchase_data.url}")
         driver.get(purchase_data.url)
