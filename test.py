@@ -18,7 +18,7 @@ def second_main():
             exchange="url",
             routing_key="url_queue",
             # body=b'{"errors": [], "status_code": <StatusCodes.already_bought: 401>, "info": "none", "tx_id": 3}',
-            body=b'{"url": "https://www.roblox.com/game-pass/153455721/Husband", "price": 10, "tx_id": 2}'
+            body=b'{"url": "https://www.roblox.com/game-pass/3717053/The-Cheapest-Game-Pass", "price": 1, "tx_id": 2}'
         )
 
     conn.close()

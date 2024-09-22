@@ -13,6 +13,8 @@ from pydantic import BaseModel, validator
 import pika
 from pika.exceptions import AMQPConnectionError
 
+from app.settings import Settings
+
 
 def sync(f):
     @functools.wraps(f)
@@ -95,7 +97,7 @@ class BasicPikaClient:
         logger.info("Sender connection closed")
 
     def declare_queue(
-        self, queue_name, exclusive: bool = False, max_priority: int = 10
+        self, queue_name, exclusive: bool = False
     ):
         self.check_connection()
         logger.debug(f"Trying to declare queue({queue_name})...")
@@ -105,7 +107,6 @@ class BasicPikaClient:
             durable=True,
             auto_delete=False,
             passive=False,
-            arguments={"x-max-priority": max_priority},
         )
 
     def declare_exchange(self, exchange_name: str, exchange_type: str = "direct"):

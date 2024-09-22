@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from app.browser import auth_browser
-from app.providers import get_token_service
+from app.providers import get_token_service, get_publisher
 from app.services.db import get_db_conn
 from app.services.driver import get_driver, convert_browser_cookies_to_aiohttp
 from app.services.queue.consumers import URLConsumer
@@ -26,6 +26,7 @@ async def main():
     connection = await get_db_conn(settings.db_dsn)
     token_service = await get_token_service(settings, connection)
     driver = get_driver(settings)
+    publisher = get_publisher(settings)
 
     await auth_browser(driver, token_service)
 
@@ -37,7 +38,8 @@ async def main():
         "connection": connection,
         "driver": driver,
         "token_service": token_service,
-        "session": session
+        "session": session,
+        "publisher": publisher,
     }
     # ссанина
     kw = {

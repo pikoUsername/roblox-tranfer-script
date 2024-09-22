@@ -26,3 +26,5 @@ def get_publisher(settings: Settings):
 
 	publisher.connect()
 	logger.info("Connection to publisher has been established")
+
+	return publisher

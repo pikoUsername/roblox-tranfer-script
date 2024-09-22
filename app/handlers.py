@@ -60,7 +60,7 @@ class UrlHandler(IListener):
             text = WebDriverWait(driver, 3).until(
                 presence_of_any_text_in_element((By.ID, "nav-robux-amount"))
             )
-            text = int(text)
+            text = int(text.text)
         except TimeoutException:
             return await self.get_robux_by_request(driver, session)
 
@@ -173,7 +173,10 @@ class UrlHandler(IListener):
             confirm_btn = driver.find_element(By.CSS_SELECTOR, "a#confirm-btn.btn-primary-md")
             logger.info("Clicking buy now")
             # HERE IT BUYS GAMEPASS
-            confirm_btn.click()
+            if not settings.disabled:
+                confirm_btn.click()
+            else:
+                logger.info("Gamepass buy is disabled!")
 
             logger.info(f"Purchased gamepass for {cost.text} robuxes")
             _temp = ReturnSignal(

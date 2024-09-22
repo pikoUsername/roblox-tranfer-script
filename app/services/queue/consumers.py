@@ -71,7 +71,7 @@ class ExampleConsumer(BasicConsumer):
         :rtype: pika.adapters.asyncio_connection.AsyncioConnection
 
         """
-        logger.info('Connecting to %s', self._url)
+        logger.info(f'Connecting to {self._url}')
         return AsyncioConnection(
             parameters=pika.URLParameters(self._url),
             on_open_callback=self.on_connection_open,

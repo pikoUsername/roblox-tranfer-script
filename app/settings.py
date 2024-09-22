@@ -23,6 +23,7 @@ class Settings(BaseSettings):
                       "Chrome/87.0.4280.141 Safari/537.36"
 
     debug: bool = True
+    disabled: bool = True
     browser: str = "Chrome"
     browser_dsn: str = ""  # uses only when we are using remote browser
 
