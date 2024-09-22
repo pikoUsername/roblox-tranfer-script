@@ -15,6 +15,9 @@ def validate_game_pass_url(url: str) -> bool:
     if match:
         return True
 
+    if not match:
+        return False
+
     groups = match.groups()
 
     if len(groups) != 3:
