@@ -121,7 +121,7 @@ class UrlHandler(IListener):
         #     data.update(
         #         return_signal=ReturnSignal(status_code=StatusCodes.invalid_data)
         #     )
-        #     return
+        #     returnц
 
         logger.info(f"Redirecting to {purchase_data.url}")
         driver.get(purchase_data.url)

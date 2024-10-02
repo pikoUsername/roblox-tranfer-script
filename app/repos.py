@@ -1,4 +1,4 @@
-from typing import Sequence, Union, Optional
+from typing import Sequence, Union, Optional, Dict, Any
 
 from app.services.interfaces import BasicDBConnector
 
@@ -19,6 +19,21 @@ class TokenRepository:
         tokens = []
         for record in results:
             tokens.append(record.get("token"))
+        return tokens
+
+    async def fetch_tokens_with_user(self, limit: int = 10) -> list[Dict[str, Any]]:
+        conn = self.conn
+        model_name = self._model_name
+
+        sql = f"SELECT token, roblox_name FROM {model_name} WHERE is_active = true LIMIT {limit}"
+
+        results: Sequence[dict] = await conn.fetchmany(sql)
+        tokens: list[dict] = []
+        for record in results:
+            tokens.append({
+                'token': record.get("token"),
+                'roblox_name': record.get('roblox_name'),
+            })
         return tokens
 
     async def fetch_token(self) -> Optional[str]:
@@ -43,4 +58,5 @@ class TokenRepository:
         model_name = self._model_name
 
         await conn.execute(f"CREATE TABLE IF NOT EXISTS {model_name} ("
-                           f"id SERIAL PRIMARY KEY, token TEXT, is_active BOOLEAN DEFAULT true);")
+                           f"id SERIAL PRIMARY KEY, "
+                           f"roblox_name VARCHAR(255), token TEXT, is_active BOOLEAN DEFAULT true);")
