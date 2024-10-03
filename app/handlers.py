@@ -8,6 +8,7 @@ from loguru import logger
 from selenium.common import NoSuchElementException, TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 
 from app.browser import is_authed
@@ -92,12 +93,19 @@ class UrlHandler(IListener):
         # marks the current token as spent
         await self.mark_as_spent(driver)
         driver.delete_cookie(name=ROBLOX_TOKEN_KEY)
-        token = await self.token_service.fetch_token()
-        if not token:
-            logger.info("OUT OF TOKENS")
-            return
+        tokens = await self.token_service.fetch_selected_tokens()
+        if not tokens:
+            tokens = await self.token_service.fetch_active_tokens()
+            await self.token_service.mark_as_selected(tokens[0])
+            if not tokens:
+                logger.info("OUT OF TOKENS")
+                return
+        token = tokens[0]
         set_token(driver, token)
         driver.refresh()
+
+    def get_driver_token(self, driver) -> str:
+        return driver.get_cookie(name=ROBLOX_TOKEN_KEY)
 
     async def change_token_recursive(self, driver: Chrome, depth: int = TOKEN_RECURSIVE_CHECK):
         if depth == 0:
@@ -106,6 +114,18 @@ class UrlHandler(IListener):
         if not is_authed(driver):
             await self.change_token(driver)
         await self.change_token_recursive(driver, depth - 1)
+
+    async def change_token_to_selected(self, driver: Chrome):
+        driver.delete_cookie(name=ROBLOX_TOKEN_KEY)
+        tokens = await self.token_service.fetch_selected_tokens()
+        if not tokens:
+            tokens = await self.token_service.fetch_active_tokens()
+            await self.token_service.mark_as_selected(tokens[0])
+            if not tokens:
+                raise RuntimeError("No tokens available")
+        token = tokens[0]
+        set_token(driver, token)
+        driver.refresh()
 
     async def __call__(
             self,
@@ -148,6 +168,16 @@ class UrlHandler(IListener):
             )
 
             return
+        if not await self.token_service.is_token_selected(self.get_driver_token(driver)):
+            try:
+                await self.change_token_to_selected(driver)
+            except RuntimeError:
+                data.update(
+                    return_signal=ReturnSignal(
+                        status_code=StatusCodes.no_tokens_available,
+                    )
+                )
+                return
 
         if robux < 5 or (int(cost.text.replace(",", "")) > robux and robux < 50):
             try:
