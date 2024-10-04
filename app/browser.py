@@ -37,10 +37,14 @@ def auth(browser: WebDriver, token: str):
 async def auth_browser(driver: WebDriver, token_service: TokenRepository) -> None:
 	logger.info("First token has been taken")
 
-	token = await token_service.fetch_token()
-	if not token:
-		raise ValueError("Tokens are unavailable")
+	tokens = await token_service.fetch_selected_tokens()
+	if not tokens:
+		tokens = await token_service.fetch_active_tokens()
+		if not tokens:
+			raise ValueError("Tokens are unavailable")
+		await token_service.mark_as_selected(tokens[0])
 
+	token = tokens[0]
 	logger.info("Starting authentication to roblox.com")
 
 	logger.info("Logging in")

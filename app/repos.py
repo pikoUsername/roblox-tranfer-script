@@ -34,7 +34,6 @@ class TokenRepository:
             SELECT token 
             FROM {self._model_name} 
             WHERE is_active = true 
-            ORDER BY RANDOM() 
             LIMIT {limit}
         """
 

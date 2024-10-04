@@ -49,8 +49,8 @@ class UrlHandler(IListener):
         self.token_service: Optional[TokenRepository] = None
         self.setupped = False
 
-    async def setup(self):
-        pass
+    async def setup(self, token_service):
+        self.token_service = token_service
 
     def close(self):
         pass
@@ -86,7 +86,7 @@ class UrlHandler(IListener):
             return (await resp.json()).get("robux")
 
     async def mark_as_spent(self, driver) -> None:
-        token = driver.get_cookie(ROBLOX_TOKEN_KEY)
+        token = driver.get_cookie(ROBLOX_TOKEN_KEY)['value']
         await self.token_service.mark_as_inactive(token)
 
     async def change_token(self, driver) -> None:
@@ -96,10 +96,11 @@ class UrlHandler(IListener):
         tokens = await self.token_service.fetch_selected_tokens()
         if not tokens:
             tokens = await self.token_service.fetch_active_tokens()
-            await self.token_service.mark_as_selected(tokens[0])
             if not tokens:
                 logger.info("OUT OF TOKENS")
                 return
+
+            await self.token_service.mark_as_selected(tokens[0])
         token = tokens[0]
         set_token(driver, token)
         driver.refresh()
@@ -168,7 +169,7 @@ class UrlHandler(IListener):
             )
 
             return
-        if not await self.token_service.is_token_selected(self.get_driver_token(driver)):
+        if not await self.token_service.is_token_selected(self.get_driver_token(driver)['value']):
             try:
                 await self.change_token_to_selected(driver)
             except RuntimeError:

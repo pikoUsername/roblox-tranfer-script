@@ -2,6 +2,7 @@ from typing import Optional, Dict, Any, List, TYPE_CHECKING
 
 import sqlite3
 from asyncpg import Pool, Connection, Record
+from loguru import logger
 
 from app.services.interfaces import BasicDBConnector
 
@@ -35,6 +36,8 @@ class AsyncpgDBConnector(BasicDBConnector):
         async with pool.acquire() as conn:
             conn: Connection
             records: List[dict] = await conn.fetch(sql, *args, **kwargs)
+
+        logger.info(f"Records: {records}")
 
         return records
 
