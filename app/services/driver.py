@@ -74,7 +74,7 @@ def get_driver(settings: "Settings") -> WebDriver:
         agent = settings.user_agent
         opts.add_argument(agent)
 
-        service = GeckoService(GeckoDriverManager(path="./drivers/").install())
+        service = GeckoService(GeckoDriverManager().install())
         driver = webdriver.Firefox(service=service, options=opts)
     else:
         raise NotImplementedError(f"{settings.browser} is not yet implemented")
